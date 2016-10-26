@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+    <Button
+        android:id="@+id/startRecorder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/startRecorder"/>
+
+    <TextView
+        android:id="@+id/stateView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/state" />
+
+    <TextView
+        android:id="@+id/resultView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/result" />
+
+    <TextView
+        android:id="@+id/errorView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/error" />
+
+</LinearLayout>

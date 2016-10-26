@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ASRTTSTest</string>
+    <string name="startRecorder">开始录音</string>
+    <string name="state">状态：</string>
+    <string name="result">识别结果：</string>
+    <string name="error">错误信息：</string>
+</resources>
