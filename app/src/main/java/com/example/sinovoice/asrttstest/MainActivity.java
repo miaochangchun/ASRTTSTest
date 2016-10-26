@@ -10,11 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.sinovoice.hcicloudsdk.common.HciErrorCode;
-import com.sinovoice.hcicloudsdk.recorder.RecorderEvent;
 
 import ttsutil.HciCloudAsrHelper;
 import ttsutil.HciCloudSysHelper;
-import ttsutil.HciCloudTtsHelper;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -25,7 +23,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView stateView;
     private HciCloudSysHelper mHciCloudSysHelper;
     private HciCloudAsrHelper mHciCloudAsrHelper;
-    private HciCloudTtsHelper mHciCloudTtsHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,14 +39,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void initAsrAndTts() {
         mHciCloudSysHelper = HciCloudSysHelper.getInstance();
         mHciCloudAsrHelper = HciCloudAsrHelper.getInstance();
-        mHciCloudTtsHelper = HciCloudTtsHelper.getInstance();
         int errorCode = mHciCloudSysHelper.init(this);
         if (errorCode != HciErrorCode.HCI_ERR_NONE) {
             Log.e(TAG, "mHciCloudSysHelper.init failed and return " + errorCode);
             return;
         }
-        mHciCloudAsrHelper.initAsrRecorder(this);
-        mHciCloudTtsHelper.initTtsPlayer(this);
+        String asrCapkey = "asr.cloud.freetalk";
+        mHciCloudAsrHelper.initAsrRecorder(this, asrCapkey);
+
         mHciCloudAsrHelper.setMyHander(new MyHandler());
     }
 
@@ -74,6 +71,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             default:
                 break;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mHciCloudAsrHelper != null) {
+            mHciCloudAsrHelper.releaseAsrRecorder();
+        }
+        if (mHciCloudSysHelper != null) {
+            mHciCloudSysHelper.release();
+        }
+        super.onDestroy();
     }
 
     private class MyHandler extends Handler{

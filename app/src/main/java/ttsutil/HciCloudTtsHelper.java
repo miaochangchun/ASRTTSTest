@@ -31,9 +31,9 @@ public class HciCloudTtsHelper {
         return mHciCloudTtsHelper;
     }
 
-    public void initTtsPlayer(Context context){
+    public void initTtsPlayer(Context context, String capkey){
         mTtsPlayer = new TTSPlayer();
-        String strConfig = getTtsInitParam(context);
+        String strConfig = getTtsInitParam(context, capkey);
         mTtsPlayer.init(strConfig, new TTSEventProcess());
         Log.d(TAG, "initTtsPlayer Success.");
     }
@@ -97,17 +97,15 @@ public class HciCloudTtsHelper {
     /**
      * 获取TTS的参数配置
      * @param context
+     * @param capkey    发音人
      * @return
      */
-    private String getTtsInitParam(Context context) {
+    private String getTtsInitParam(Context context, String capkey) {
         TtsInitParam ttsInitParam = new TtsInitParam();
         String dataPath = context.getFilesDir().getAbsolutePath().replace("files", "lib");
         ttsInitParam.addParam(TtsInitParam.PARAM_KEY_DATA_PATH, dataPath);
         ttsInitParam.addParam(TtsInitParam.PARAM_KEY_FILE_FLAG, "android_so");
-        ttsInitParam.addParam(TtsInitParam.PARAM_KEY_INIT_CAP_KEYS, "tts.cloud.hui;tts.cloud.kate;tts.cloud.misaki;tts.cloud.yumi;" +
-                "tts.cloud.anna;tts.cloud.thomas;tts.cloud.violeta;tts.cloud.milena;tts.cloud.vera;tts.cloud.narisa;" +
-                "tts.cloud.aylin;tts.cloud.claire;tts.cloud.melina;tts.cloud.maged;tts.cloud.javier;tts.cloud.damayanti;" +
-                "tts.cloud.xiaojie;tts.cloud.uyghur");
+        ttsInitParam.addParam(TtsInitParam.PARAM_KEY_INIT_CAP_KEYS, capkey);
         return ttsInitParam.getStringConfig();
     }
 

@@ -13,6 +13,11 @@ import com.sinovoice.hcicloudsdk.common.asr.AsrRecogResult;
 import com.sinovoice.hcicloudsdk.recorder.ASRRecorderListener;
 import com.sinovoice.hcicloudsdk.recorder.RecorderEvent;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 /**
  * Created by miaochangchun on 2016/10/25.
  */
@@ -22,6 +27,7 @@ public class HciCloudAsrHelper {
     private ASRRecorder mASRRecorder;
     private Handler myHander;
     private String voicePath;   //音频文件保存路径
+    private HciCloudTtsHelper mHcicloudTtsHelper;   //TTS播放器帮助类
 
     public void setVoicePath(String voicePath) {
         this.voicePath = voicePath;
@@ -53,10 +59,13 @@ public class HciCloudAsrHelper {
      * 录音机初始化
      * @param context
      */
-    public void initAsrRecorder(Context context) {
+    public void initAsrRecorder(Context context, String capkey) {
         mASRRecorder = new ASRRecorder();
-        String strConfig = getAsrInitParam(context);
+        String strConfig = getAsrInitParam(context, capkey);
         mASRRecorder.init(strConfig, new ASRRecorderCallback());
+
+        mHcicloudTtsHelper = HciCloudTtsHelper.getInstance();
+        mHcicloudTtsHelper.initTtsPlayer(context, "tts.local.synth");
     }
 
     /**
@@ -64,9 +73,9 @@ public class HciCloudAsrHelper {
      * @param context
      * @return
      */
-    private String getAsrInitParam(Context context) {
+    private String getAsrInitParam(Context context, String capkey) {
         AsrInitParam asrInitParam = new AsrInitParam();
-        asrInitParam.addParam(AsrInitParam.PARAM_KEY_INIT_CAP_KEYS, "asr.cloud.freetalk");
+        asrInitParam.addParam(AsrInitParam.PARAM_KEY_INIT_CAP_KEYS, capkey);
         asrInitParam.addParam(AsrInitParam.PARAM_KEY_FILE_FLAG, "android_so");
         String dataPath = context.getFilesDir().getAbsolutePath().replace("files", "lib");
         asrInitParam.addParam(AsrInitParam.PARAM_KEY_DATA_PATH, dataPath);
@@ -101,6 +110,9 @@ public class HciCloudAsrHelper {
      * 录音机release接口
      */
     public void releaseAsrRecorder() {
+        if (mHcicloudTtsHelper != null) {
+            mHcicloudTtsHelper.releaseTtsPlayer();
+        }
         if (mASRRecorder != null) {
             mASRRecorder.release();
         }
@@ -110,7 +122,7 @@ public class HciCloudAsrHelper {
      * ASR录音机回调类
      */
     private class ASRRecorderCallback implements ASRRecorderListener{
-
+        String result = "";
         @Override
         public void onRecorderEventStateChange(RecorderEvent recorderEvent) {
             String state = "状态为：初始状态";
@@ -141,13 +153,10 @@ public class HciCloudAsrHelper {
 
         @Override
         public void onRecorderEventRecogFinsh(RecorderEvent recorderEvent, AsrRecogResult asrRecogResult) {
-            if (recorderEvent == RecorderEvent.RECORDER_EVENT_RECOGNIZE_COMPLETE) {
-                //调用TTS的播放器
-            }
             if (asrRecogResult != null) {
                 if (asrRecogResult.getRecogItemList().size() > 0) {
                     //识别结果
-                    String result = asrRecogResult.getRecogItemList().get(0).getRecogResult();
+                    result = asrRecogResult.getRecogItemList().get(0).getRecogResult();
                     //置信度
                     int score = asrRecogResult.getRecogItemList().get(0).getScore();
 
@@ -159,6 +168,16 @@ public class HciCloudAsrHelper {
                     message.setData(bundle);
                     myHander.sendMessage(message);
                 }
+            }
+
+            if (recorderEvent == RecorderEvent.RECORDER_EVENT_RECOGNIZE_COMPLETE) {
+                //调用TTS的播放器
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mHcicloudTtsHelper.playTtsPlayer(result, "tts.local.synth");
+                    }
+                }).start();
             }
         }
 
@@ -182,7 +201,24 @@ public class HciCloudAsrHelper {
 
         @Override
         public void onRecorderRecording(byte[] bytes, int i) {
-
+//            File file = new File(voicePath);
+//            if (!file.exists()) {
+//                file.getParentFile().mkdirs();
+//                try {
+//                    file.createNewFile();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            try {
+//                FileOutputStream outputStream = new FileOutputStream(file);
+//                outputStream.write(bytes);
+//                outputStream.close();
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 }
